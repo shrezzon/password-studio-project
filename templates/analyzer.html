@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Analyze a password · Password Studio{% endblock %}
+{% block content %}
+<div class="eyebrow">PASSWORD STRENGTH</div>
+<h1>Understand your password</h1>
+<p class="lede">Check its length, character types and common patterns. Your input is analyzed on this computer.</p>
+<div class="grid two">
+  <section class="card">
+    <div class="card-heading"><div><h2>Analyze a password</h2><p>Try a sample or enter a password to inspect.</p></div><span class="pill">Offline check</span></div>
+    <form method="post" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label for="password">Password</label>
+      <div class="input-row"><input id="password" name="password" type="password" maxlength="200" required value="{{ password }}" placeholder="Enter a password"><button type="button" class="ghost" data-toggle="password">Show</button></div>
+      <p class="help">Your password is not added to the vault or sent online.</p>
+      <button type="submit" class="primary">Analyze password <span>→</span></button>
+    </form>
+    <div class="divider"></div>
+    <div class="hint"><strong>What is checked?</strong><p>Length, character variety, {{ common_count }} common passwords, keyboard sequences, repetition, dictionary words, years, and names.</p></div>
+  </section>
+  <section class="card result-card">
+    {% if result %}
+      <div class="card-heading"><div><h2>Analysis result</h2><p>A simple rule-based score, out of 100.</p></div><span class="pill">{{ result.label }}</span></div>
+      <div class="score-line"><strong>{{ result.score }}</strong><span>/ 100<br><b>{{ result.label }}</b></span></div>
+      <progress max="100" value="{{ result.score }}" aria-label="Strength score"></progress>
+      <div class="metrics"><div><span>Length</span><strong>{{ result.length }} characters</strong></div><div><span>Random-model estimate</span><strong>{% if result.entropy is not none %}{{ result.entropy }} bits{% else %}Unavailable{% endif %}</strong></div></div>
+      <p class="help">Character types detected: {% for group, present in result.groups.items() if present %}{{ group }}{% if not loop.last %}, {% endif %}{% else %}none in the ASCII model{% endfor %}.</p>
+      <h3>Pattern findings</h3>
+      <ul class="findings">{% for warning in result.warnings %}<li>{{ warning }}</li>{% endfor %}</ul>
+      <div class="time-estimate"><span>Illustrative guess time</span><strong>{{ result.crack_time }}</strong><small>{{ result.model }}</small></div>
+      <p class="help">Random-model bits and time are not a guarantee. Human patterns can be guessed much faster.</p>
+    {% else %}
+      <div class="empty-icon">◎</div><h2>Your result appears here</h2><p>Enter a password to see its score, pattern warnings and estimated guessing time.</p>
+      <div class="example">Try <b>password123</b> to see common weaknesses, then generate a fresh random password.</div>
+    {% endif %}
+  </section>
+</div>
+<div class="bottom-note"><strong>Keep in mind</strong> A high score is not proof of security. Use unique passwords and multifactor authentication where available.</div>
+{% endblock %}

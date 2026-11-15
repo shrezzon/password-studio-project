@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Crack-time demonstration · Password Studio{% endblock %}
+{% block content %}
+<div class="eyebrow">CRACK-TIME DEMONSTRATION</div>
+<h1>See the difference</h1>
+<p class="lede">Compare a known common password with a freshly generated 20-character example.</p>
+<div class="grid two demo-grid">
+  <section class="card"><span class="pill warning-pill">KNOWN COMMON PASSWORD</span><h2>Weak example</h2><div class="sample">{{ weak }}</div>
+    <span class="metric-label">Illustrative guess time</span><div class="big-time">{{ weak_result.crack_time }}</div>
+    <p>{{ weak_result.model }}. A list-based attacker may try this password near the beginning.</p><p><strong>Score:</strong> {{ weak_result.score }}/100 · {{ weak_result.label }}</p>
+  </section>
+  <section class="card"><span class="pill">RANDOMLY GENERATED EXAMPLE</span><h2>Strong example</h2><div class="sample break">{{ strong }}</div>
+    <span class="metric-label">Illustrative guess time</span><div class="big-time">{{ strong_result.crack_time }}</div>
+    <p>{{ strong_result.model }}. This is a random-character model, not a measured cracking time.</p><p><strong>Score:</strong> {{ strong_result.score }}/100 · {{ strong_result.label }}</p>
+  </section>
+</div>
+<div class="bottom-note"><strong>About the estimate</strong> This demo assumes 10 billion guesses per second and, for the random example, an average of half the estimated search space. Attack speed depends on the system, hashing method and attacker. Human-chosen patterns can be guessed far sooner. The generator guarantees selected character types, so the full-pool estimate is an upper approximation. Refresh for a new demo example; do not use the displayed example as a real password.</div>
+{% endblock %}

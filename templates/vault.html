@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Password vault · Password Studio{% endblock %}
+{% block content %}
+<div class="eyebrow">ENCRYPTED PASSWORD VAULT</div>
+<h1>{% if state == 'open' %}Your password vault{% else %}Keep credentials protected{% endif %}</h1>
+<p class="lede">Your vault is encrypted locally with a key derived from your master password.</p>
+{% if state == 'create' %}
+<div class="grid two">
+  <section class="card"><div class="card-heading"><div><h2>Create your vault</h2><p>This master password unlocks all saved entries.</p></div><span class="pill">First-time setup</span></div>
+    <form action="{{ url_for('create_vault') }}" method="post" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label for="master">Master password</label><div class="input-row"><input id="master" name="master" type="password" minlength="12" maxlength="200" required autocomplete="new-password"><button type="button" class="ghost" data-toggle="master">Show</button></div>
+      <label for="confirm">Confirm master password</label><input id="confirm" name="confirm" type="password" minlength="12" maxlength="200" required autocomplete="new-password">
+      <p class="help">Use at least 12 characters. A long, unique passphrase is a good choice.</p>
+      <button type="submit" class="primary">Create encrypted vault <span>→</span></button>
+    </form>
+  </section>
+  <section class="card"><h2>How protection works</h2><ul class="steps"><li><b>1</b><span>Your master password is verified against a salted PBKDF2 hash.</span></li><li><b>2</b><span>A separate salt derives the encryption key.</span></li><li><b>3</b><span>Your credentials are encrypted together using Fernet.</span></li></ul><div class="example"><strong>Remember your master password.</strong> There is no recovery option. Back up the encrypted vault file separately.</div></section>
+</div>
+{% elif state == 'locked' %}
+<div class="grid two"><section class="card"><div class="card-heading"><div><h2>Unlock your vault</h2><p>Enter the master password you created.</p></div><span class="pill warning-pill">Locked</span></div>
+  {% if remaining %}<div class="flash error">Temporary lock: wait about {{ remaining }} seconds, then try again.</div>{% endif %}
+  <form action="{{ url_for('login_vault') }}" method="post" autocomplete="off"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="master">Master password</label><div class="input-row"><input id="master" name="master" type="password" maxlength="200" required autocomplete="current-password"><button type="button" class="ghost" data-toggle="master">Show</button></div>
+    <p class="help">Three incorrect attempts cause a 30-second lock.</p><button type="submit" class="primary">Unlock vault <span>→</span></button>
+  </form></section>
+  <section class="card"><h2>Local and encrypted</h2><p>The vault file stores encrypted credentials and a salted hash for verification. Your master password is not saved as plaintext.</p><div class="example">If the master password is lost, the vault cannot be recovered by this application.</div></section></div>
+{% else %}
+<div class="vault-toolbar"><span class="pill">● Unlocked</span><form action="{{ url_for('lock_vault') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="ghost">Lock vault</button></form></div>
+<div class="grid vault-grid"><section class="card"><div class="card-heading"><div><h2>Add a credential</h2><p>All three fields are saved encrypted.</p></div></div>
+  <form action="{{ url_for('add_entry') }}" method="post" autocomplete="off"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="site">Website or account</label><input id="site" type="text" name="site" maxlength="120" required placeholder="Example: Email">
+    <label for="username">Username or email</label><input id="username" type="text" name="username" maxlength="120" required placeholder="Your username">
+    <label for="entry_password">Password</label><div class="input-row"><input id="entry_password" name="password" type="password" maxlength="256" required autocomplete="new-password"><button type="button" class="ghost" data-toggle="entry_password">Show</button></div>
+    <button type="submit" class="primary">Save to vault <span>→</span></button>
+  </form></section>
+  <section class="card"><div class="card-heading"><div><h2>Saved credentials</h2><p>{{ entries|length }} saved account{{ '' if entries|length == 1 else 's' }}</p></div><span class="pill">Encrypted at rest</span></div>
+    {% for entry in entries %}<article class="entry"><div><h3>{{ entry.site }}</h3><span class="entry-user">{{ entry.username }}</span></div><div class="input-row"><input id="secret-{{ entry.id }}" type="password" value="{{ entry.password }}" readonly aria-label="Saved password"><button type="button" class="ghost" data-toggle="secret-{{ entry.id }}">Show</button><button type="button" class="ghost" data-copy="secret-{{ entry.id }}">Copy</button></div><form action="{{ url_for('delete_entry') }}" method="post" data-confirm="Delete this credential?"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="entry_id" value="{{ entry.id }}"><button class="link-danger" type="submit">Delete credential</button></form></article>
+    {% else %}<div class="empty-icon">▣</div><p>No credentials saved yet. Add one using the form.</p>{% endfor %}
+  </section></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Password Studio{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="{{ url_for('analyzer') }}"><span class="brand-icon">◆</span><span>Password Studio<small>STRENGTH ANALYZER &amp; VAULT</small></span></a>
+      <span class="local-note"><span class="dot"></span> Runs on your computer</span>
+    </div>
+  </header>
+  <div class="layout">
+    <nav class="navigation" aria-label="Main navigation">
+      <span class="nav-caption">WORKSPACE</span>
+      <a class="{{ 'active' if request.endpoint == 'analyzer' }}" href="{{ url_for('analyzer') }}"><span>◎</span> Analyze</a>
+      <a class="{{ 'active' if request.endpoint == 'generator' }}" href="{{ url_for('generator') }}"><span>✦</span> Generate</a>
+      <a class="{{ 'active' if request.endpoint == 'vault' }}" href="{{ url_for('vault') }}"><span>▣</span> Password vault</a>
+      <a class="{{ 'active' if request.endpoint == 'demonstration' }}" href="{{ url_for('demonstration') }}"><span>◷</span> Crack-time demo</a>
+      <div class="nav-foot"><strong>Designed for learning</strong><br>Passwords stay local. The strength estimate is illustrative.</div>
+    </nav>
+    <main class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}<div class="flash {{ category }}" role="status">{{ message }}</div>{% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+      <footer>College project · Local-only demonstration · No online password lookup</footer>
+    </main>
+  </div>
+</body>
+</html>

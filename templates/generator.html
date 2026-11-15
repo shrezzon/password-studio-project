@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Generate a password · Password Studio{% endblock %}
+{% block content %}
+<div class="eyebrow">PASSWORD GENERATOR</div>
+<h1>Create a fresh password</h1>
+<p class="lede">Choose the length and character types. Randomness comes from Python's secure <code>secrets</code> module.</p>
+<div class="grid two">
+  <section class="card">
+    <div class="card-heading"><div><h2>Generator settings</h2><p>Select at least one character type.</p></div><span class="pill">Secure random</span></div>
+    <form method="post" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label for="length">Password length</label>
+      <input id="length" name="length" type="number" min="8" max="64" value="{{ length }}" required>
+      <p class="help">Choose 8–64 characters. A longer password is generally harder to guess.</p>
+      <fieldset><legend>Include character types</legend>
+        {% for group, example in [('lowercase','a–z'),('uppercase','A–Z'),('digits','0–9'),('symbols','! @ # $ ...')] %}
+        <label class="check"><input type="checkbox" name="groups" value="{{ group }}" {{ 'checked' if group in selected }}> <span>{{ group|capitalize }}</span><small>{{ example }}</small></label>
+        {% endfor %}
+      </fieldset>
+      <button type="submit" class="primary">Generate password <span>→</span></button>
+    </form>
+  </section>
+  <section class="card">
+    <div class="card-heading"><div><h2>Generated password</h2><p>A new password is created each time.</p></div></div>
+    {% if generated %}
+      <label for="generated">Your password</label>
+      <div class="input-row"><input id="generated" type="text" value="{{ generated }}" readonly><button type="button" class="ghost" data-copy="generated">Copy</button></div>
+      <p class="help">Use it for one account only. You can add it to your vault manually.</p>
+      <div class="example"><strong>Tip:</strong> Check the website's password rules. The generator includes at least one character from every selected type.</div>
+    {% else %}
+      <div class="empty-icon">✦</div><h2>Ready when you are</h2><p>Choose your settings and select Generate password.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
